@@ -40,7 +40,15 @@ X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size = 
 
 #create the model!
 model  = Sequential()
+#input layer, define input shape
+model.add(Conv2D(filters = 32, kernel_size = 2, padding = 'Same', data_format = 'channels_last', activation = 'relu', input_shape = (28,28,1)))
+
 model.add(Conv2D(filters = 32, kernel_size = 2, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
 
+model.add(MaxPool2D(pool_size = 2))
 
-plot_model(model, to_file='model.png', show_shapes = True)
+#output layer to compare to labels!
+model.add(Dense(10, activation = "softmax"))
+
+
+plot_model(model, to_file='model.png')
