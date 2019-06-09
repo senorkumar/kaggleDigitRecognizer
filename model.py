@@ -66,10 +66,24 @@ model.compile(optimizer = optimizer, loss = loss, metrics = ['accuracy'])
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc', patience=3, verbose=1, factor=0.5, min_lr=0.00001)
 
 #increase when trying to get a good result, currently 1 for testing
-epochs = 100
+epochs = 1
 
 batch_size = 100
 
 #add data aug here later!
 
-model.fit(X_train, Y_train, batch_size = batch_size, epochs = epochs, verbose  =1, validation_data = (X_val, Y_val), validation_freq  = 5)
+history  = model.fit(X_train, Y_train, batch_size = batch_size, epochs = epochs, verbose  =1, validation_data = (X_val, Y_val), validation_freq  = 5)
+
+
+# predict results
+results = model.predict(test)
+
+
+# select the indix with the maximum probability
+results = np.argmax(results,axis = 1)
+
+results = pd.Series(results,name="Label")
+
+submission = pd.concat([pd.Series(range(1,28001),name = "ImageId"),results],axis = 1)
+
+submission.to_csv("cnn_mnist_datagen.csv",index=False)
