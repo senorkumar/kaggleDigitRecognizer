@@ -41,15 +41,29 @@ X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size = 
 #create the model!
 model  = Sequential()
 #input layer, define input shape
-model.add(Conv2D(filters = 32, kernel_size = 2, padding = 'Same', data_format = 'channels_last', activation = 'relu', input_shape = (28,28,1)))
+model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu', input_shape = (28,28,1)))
 
-model.add(Conv2D(filters = 32, kernel_size = 2, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
+model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
 
 model.add(MaxPool2D(pool_size = 2))
 
+model.add(Dropout(0.25))
+
+model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
+
+model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
+
+model.add(MaxPool2D(pool_size = 2))
+
+model.add(Dropout(0.25))
+
 #reduce dimensionallity prior to dense layer
 model.add(Flatten())
-#output layer to compare to labels!
+
+model.add(Dense(256, activation = "relu"))
+
+model.add(Dropout(0.5))
+#output layer
 model.add(Dense(10, activation = "softmax"))
 
 
@@ -66,7 +80,7 @@ model.compile(optimizer = optimizer, loss = loss, metrics = ['accuracy'])
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc', patience=3, verbose=1, factor=0.5, min_lr=0.00001)
 
 #increase when trying to get a good result, currently 1 for testing
-epochs = 1
+epochs = 30
 
 batch_size = 100
 
@@ -76,10 +90,7 @@ datagen = ImageDataGenerator(rotation_range = 10, width_shift_range = 0.1, heigh
 #calculates stats necessary to do augmentations
 datagen.fit(X_train)
 
-
-
-
-history  = model.fit_generator(datagen.flow(X_train, Y_train,batch_size = batch_size), epochs = epochs, verbose = 1 , validation_data = (X_val, Y_val), validation_freq  = 5)
+history  = model.fit_generator(datagen.flow(X_train, Y_train,batch_size = batch_size), epochs = epochs, verbose = 1 , validation_data = (X_val, Y_val), validation_freq  = 5, callbacks = [learning_rate_reduction])
 
 
 # predict results
