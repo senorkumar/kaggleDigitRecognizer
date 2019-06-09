@@ -47,8 +47,29 @@ model.add(Conv2D(filters = 32, kernel_size = 2, padding = 'Same', data_format = 
 
 model.add(MaxPool2D(pool_size = 2))
 
+#reduce dimensionallity prior to dense layer
+model.add(Flatten())
 #output layer to compare to labels!
 model.add(Dense(10, activation = "softmax"))
 
 
 plot_model(model, to_file='model.png')
+
+#define the optimizer used, chose this one for SPEEEEED
+optimizer = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
+#loss function to determine how bad our network is at classification
+loss  = 'categorical_crossentropy'
+
+model.compile(optimizer = optimizer, loss = loss, metrics = ['accuracy'])
+
+#reduce learning rate by 1/2 if accuracy isnt improved after 3 epochs using keras.callbacks
+learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc', patience=3, verbose=1, factor=0.5, min_lr=0.00001)
+
+#increase when trying to get a good result, currently 1 for testing
+epochs = 100
+
+batch_size = 100
+
+#add data aug here later!
+
+model.fit(X_train, Y_train, batch_size = batch_size, epochs = epochs, verbose  =1, validation_data = (X_val, Y_val), validation_freq  = 5)
