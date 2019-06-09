@@ -70,9 +70,16 @@ epochs = 1
 
 batch_size = 100
 
-#add data aug here later!
+#config data augmenter
+datagen = ImageDataGenerator(rotation_range = 10, width_shift_range = 0.1, height_shift_range = 0.1 ,zoom_range = 0.1)
 
-history  = model.fit(X_train, Y_train, batch_size = batch_size, epochs = epochs, verbose  =1, validation_data = (X_val, Y_val), validation_freq  = 5)
+#calculates stats necessary to do augmentations
+datagen.fit(X_train)
+
+
+
+
+history  = model.fit_generator(datagen.flow(X_train, Y_train,batch_size = batch_size), epochs = epochs, verbose = 1 , validation_data = (X_val, Y_val), validation_freq  = 5)
 
 
 # predict results
