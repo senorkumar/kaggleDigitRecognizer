@@ -4,16 +4,14 @@ from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPool2D
 from keras.optimizers import RMSprop
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ReduceLROnPlateau
-
-
-# Helper libraries
+from IPython.display import SVG
+from keras.utils.vis_utils import model_to_dot
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from sklearn.model_selection import train_test_split
-
-
+from keras.utils import plot_model
 
 train = pd.read_csv("train.csv")
 test = pd.read_csv("test.csv")
@@ -43,3 +41,6 @@ X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size = 
 #create the model!
 model  = Sequential()
 model.add(Conv2D(filters = 32, kernel_size = 2, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
+
+
+plot_model(model, to_file='model.png', show_shapes = True)
