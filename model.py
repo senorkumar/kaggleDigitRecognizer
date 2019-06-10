@@ -16,6 +16,10 @@ from keras.utils import plot_model
 train = pd.read_csv("train.csv")
 test = pd.read_csv("test.csv")
 
+#for windows
+import os
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+
 #think of mapping Y = f(X), so X is the images (28x28 pixels) and Y is the labels
 
 #mapping input number to correct label
@@ -68,6 +72,7 @@ model.add(Dense(10, activation = "softmax"))
 
 
 plot_model(model, to_file='model.png')
+print(model.summary())
 
 #define the optimizer used, chose this one for SPEEEEED
 optimizer = RMSprop(lr=0.001, rho=0.9, epsilon=1e-08, decay=0.0)
