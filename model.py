@@ -1,9 +1,9 @@
 from keras.utils.np_utils import to_categorical # convert to one-hot-encoding
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPool2D
+from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPool2D,BatchNormalization
 from keras.optimizers import RMSprop
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ReduceLROnPlateau
+from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from IPython.display import SVG
 from keras.utils.vis_utils import model_to_dot
 import numpy as np
@@ -45,28 +45,34 @@ X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size = 
 #create the model!
 model  = Sequential()
 #input layer, define input shape
-model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu', input_shape = (28,28,1)))
+model.add(Conv2D(filters = 64, kernel_size = 3,  data_format = 'channels_last', activation = 'relu', input_shape = (28,28,1)))
 
-model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
-
-model.add(MaxPool2D(pool_size = 2))
-
-model.add(Dropout(0.25))
-
-model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
-
-model.add(Conv2D(filters = 32, kernel_size = 5, padding = 'Same', data_format = 'channels_last', activation = 'relu'))
+model.add(Conv2D(filters = 64, kernel_size = 3,  data_format = 'channels_last', activation = 'relu'))
 
 model.add(MaxPool2D(pool_size = 2))
-
+model.add(BatchNormalization())
+#aggressive dropout
 model.add(Dropout(0.25))
+
+model.add(Conv2D(filters = 128, kernel_size = 3,  data_format = 'channels_last', activation = 'relu'))
+
+model.add(Conv2D(filters = 128, kernel_size = 3,  data_format = 'channels_last', activation = 'relu'))
+
+
+model.add(MaxPool2D(pool_size = 2))
+model.add(BatchNormalization())
+#aggressive dropout
+model.add(Dropout(0.25))
+
+model.add(Conv2D(filters = 256, kernel_size = 3, activation = 'relu', data_format = 'channels_last'))
+
 
 #reduce dimensionallity prior to dense layer
 model.add(Flatten())
+model.add(BatchNormalization())
+model.add(Dense(512, activation = "relu"))
 
-model.add(Dense(256, activation = "relu"))
-
-model.add(Dropout(0.5))
+model.add(Dropout(0.25))
 #output layer
 model.add(Dense(10, activation = "softmax"))
 
@@ -83,6 +89,7 @@ model.compile(optimizer = optimizer, loss = loss, metrics = ['accuracy'])
 
 #reduce learning rate by 1/2 if accuracy isnt improved after 3 epochs using keras.callbacks
 learning_rate_reduction = ReduceLROnPlateau(monitor='val_acc', patience=3, verbose=1, factor=0.5, min_lr=0.00001)
+es = EarlyStopping(monitor='val_acc', mode='max', min_delta=1, restore_best_weights = True, patience = 5, )
 
 #increase when trying to get a good result, currently 1 for testing
 epochs = 30
@@ -95,7 +102,7 @@ datagen = ImageDataGenerator(rotation_range = 10, width_shift_range = 0.1, heigh
 #calculates stats necessary to do augmentations
 datagen.fit(X_train)
 
-history  = model.fit_generator(datagen.flow(X_train, Y_train,batch_size = batch_size), epochs = epochs, verbose = 1 , validation_data = (X_val, Y_val), validation_freq  = 5, callbacks = [learning_rate_reduction])
+history  = model.fit_generator(datagen.flow(X_train, Y_train,batch_size = batch_size), epochs = epochs, verbose = 1 , validation_data = (X_val, Y_val), validation_freq  = 5, callbacks = [learning_rate_reduction,es])
 
 
 # predict results
